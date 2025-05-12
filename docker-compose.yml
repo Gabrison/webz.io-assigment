@@ -9,7 +9,6 @@ services:
     hostname: webz-001
     privileged: true
     volumes:
-      - ./logs/webz-001:/var/log/webz
       - ./corosync-node/authkey:/etc/corosync/authkey:ro
       - ./corosync-node/corosync.conf:/etc/corosync/corosync.conf:ro
     networks:
@@ -26,7 +25,6 @@ services:
     hostname: webz-002
     privileged: true
     volumes:
-      - ./logs/webz-002:/var/log/webz
       - ./corosync-node/authkey:/etc/corosync/authkey:ro
       - ./corosync-node/corosync.conf:/etc/corosync/corosync.conf:ro
     networks:
@@ -43,7 +41,6 @@ services:
     hostname: webz-003
     privileged: true
     volumes:
-      - ./logs/webz-003:/var/log/webz
       - ./corosync-node/authkey:/etc/corosync/authkey:ro
       - ./corosync-node/corosync.conf:/etc/corosync/corosync.conf:ro
     networks:

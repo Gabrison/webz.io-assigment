@@ -5,9 +5,7 @@ This project sets up a high-availability cluster and Jenkins CI environment usin
 - 3 Ubuntu 18.04 containers as cluster nodes (webz-001, webz-002, webz-003) with Pacemaker, Corosync, and Apache2
 - 1 Jenkins container (webz-004) with SSH and persistent storage
 
-## Prerequisites
-- Docker
-- Docker Compose
+
 
 ## Setup Instructions
 
@@ -74,10 +72,7 @@ service corosync status
 service pacemaker status
 service apache2 status
 ```
-Or check all at once:
-```sh
-ps aux | grep -E 'sshd|corosync|pacemakerd|apache2'
-```
+
 
 ### 8. Test Apache Homepage
 If you expose port 80 in your Compose file, you can test from your host:
@@ -107,3 +102,10 @@ Junior DevOps Engineer - Home Task
   docker exec -it webz-001 ip addr show
   ```
   Look for `172.28.1.100` assigned to eth0.
+
+## Log Volumes and Monitoring Logs
+- Jenkins container (`webz-004`) mounts the log volume:
+  - Host: `./logs/webz-004`
+  - Container: `/var/log/webz`
+- The cluster nodes (`webz-001`, `webz-002`, `webz-003`) do **not** mount any log volumes.
+- All monitoring logs (such as active node detection) are written by Jenkins and can be found in the above directory on the host.

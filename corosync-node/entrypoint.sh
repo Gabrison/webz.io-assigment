@@ -17,11 +17,9 @@ service pacemaker start
 echo "Starting apache2..."
 service apache2 start
 
-# inject message on apache homepage
+# inject message on apache homepage with hostname
 HOMEPAGE="/var/www/html/index.html"
-if ! grep -q "Junior DevOps Engineer" "$HOMEPAGE" 2>/dev/null; then
-  echo "Junior DevOps Engineer - Home Task" > "$HOMEPAGE"
-fi
+echo "Junior DevOps Engineer - Home Task from $(hostname)" > "$HOMEPAGE"
 
 # Only configure the floating IP resource and constraints on webz-001
 if [ "$(hostname)" = "webz-001" ]; then
