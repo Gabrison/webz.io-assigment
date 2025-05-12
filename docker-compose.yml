@@ -11,6 +11,7 @@ services:
     volumes:
       - ./logs/webz-001:/var/log/webz
       - ./corosync-node/authkey:/etc/corosync/authkey:ro
+      - ./corosync-node/corosync.conf:/etc/corosync/corosync.conf:ro
     networks:
       webznet:
         ipv4_address: 172.28.1.11
@@ -27,6 +28,7 @@ services:
     volumes:
       - ./logs/webz-002:/var/log/webz
       - ./corosync-node/authkey:/etc/corosync/authkey:ro
+      - ./corosync-node/corosync.conf:/etc/corosync/corosync.conf:ro
     networks:
       webznet:
         ipv4_address: 172.28.1.12
@@ -43,6 +45,7 @@ services:
     volumes:
       - ./logs/webz-003:/var/log/webz
       - ./corosync-node/authkey:/etc/corosync/authkey:ro
+      - ./corosync-node/corosync.conf:/etc/corosync/corosync.conf:ro
     networks:
       webznet:
         ipv4_address: 172.28.1.13

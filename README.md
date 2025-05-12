@@ -89,7 +89,21 @@ You should see:
 Junior DevOps Engineer - Home Task
 ```
 
-### 9. Troubleshooting
-- If containers exit immediately, ensure the entrypoint script keeps the container running (e.g., by tailing a log).
-- If containers do not start, check volume mount paths and permissions.
-- For persistent issues, check logs with `docker logs <container>` and inspect with `docker inspect <container>`.
+### 9. Cluster Resource Management, Failover Order, and Quorum
+- The cluster is configured with explicit resource location constraints so the floating IP always prefers webz-001, then webz-002, then webz-003.
+- To see which node is currently "active" (holding the floating IP), run:
+  ```sh
+  docker exec -it webz-001 crm status | cat
+  ```
+  or on any node. Look for the node listed after `Started` for the `ClusterIP` resource.
+- To simulate failover, stop corosync on the active node:
+  ```sh
+  docker exec -it webz-001 service corosync stop
+  ```
+  The floating IP will move to the next preferred node. Repeat for webz-002 to see it move to webz-003.
+- If only one node is online, the cluster will lose quorum and all resources will be stopped (this is a safety feature). Bring at least one more node back online to restore quorum and resource availability.
+- To check the floating IP on the active node:
+  ```sh
+  docker exec -it webz-001 ip addr show
+  ```
+  Look for `172.28.1.100` assigned to eth0.
