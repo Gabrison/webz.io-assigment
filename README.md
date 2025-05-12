@@ -34,7 +34,10 @@ sudo chown -R 1000:1000 ./jenkins
 sudo chmod -R 755 ./jenkins
 ```
 
-### 4. Access Jenkins
+### 4. Cluster Node Services & Automation
+All required services (sshd, corosync, pacemaker, apache2) are installed automatically in the cluster node image via the Dockerfile. The entrypoint script (`corosync-node/entrypoint.sh`) starts all services and ensures the Apache homepage displays the required message.
+
+### 5. Access Jenkins
 - URL: [http://localhost:8080](http://localhost:8080)
 - To get the initial admin password:
   1. SSH into the Jenkins container:
@@ -47,7 +50,7 @@ sudo chmod -R 755 ./jenkins
      sudo cat /var/jenkins_home/secrets/initialAdminPassword
      ```
 
-### 5. SSH Access to Containers
+### 6. SSH Access to Containers
 - webz-001: `ssh devops@localhost -p 2201`
 - webz-002: `ssh devops@localhost -p 2202`
 - webz-003: `ssh devops@localhost -p 2203`
@@ -58,3 +61,35 @@ sudo chmod -R 755 ./jenkins
 ```sh
 ssh-keygen -R '[localhost]:2204'  # or the relevant port
 ```
+
+### 7. Checking Service Status in a Node
+To check if services are running inside a cluster node, exec into the container:
+```sh
+docker exec -it webz-001 bash
+```
+Then run:
+```sh
+service ssh status
+service corosync status
+service pacemaker status
+service apache2 status
+```
+Or check all at once:
+```sh
+ps aux | grep -E 'sshd|corosync|pacemakerd|apache2'
+```
+
+### 8. Test Apache Homepage
+If you expose port 80 in your Compose file, you can test from your host:
+```sh
+curl http://localhost:PORT/
+```
+You should see:
+```
+Junior DevOps Engineer - Home Task
+```
+
+### 9. Troubleshooting
+- If containers exit immediately, ensure the entrypoint script keeps the container running (e.g., by tailing a log).
+- If containers do not start, check volume mount paths and permissions.
+- For persistent issues, check logs with `docker logs <container>` and inspect with `docker inspect <container>`.

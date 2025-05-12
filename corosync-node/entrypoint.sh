@@ -17,7 +17,7 @@ service pacemaker start
 echo "Starting apache2..."
 service apache2 start
 
-# Ensure Apache homepage displays the required message
+# inject message on apache homepage
 HOMEPAGE="/var/www/html/index.html"
 if ! grep -q "Junior DevOps Engineer" "$HOMEPAGE" 2>/dev/null; then
   echo "Junior DevOps Engineer - Home Task" > "$HOMEPAGE"
