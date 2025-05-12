@@ -73,10 +73,3 @@ networks:
       config:
         - subnet: 172.28.1.0/24 
 
-volumes:
-  corosync-authkey:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /Users/gabrielsonnino/Desktop/webz.io-assigment/corosync-node/authkey
