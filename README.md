@@ -96,7 +96,7 @@ Junior DevOps Engineer - Home Task
   docker exec -it webz-001 service corosync stop
   ```
   The floating IP will move to the next preferred node. Repeat for webz-002 to see it move to webz-003.
-- If only one node is online, the cluster will lose quorum and all resources will be stopped (this is a safety feature). Bring at least one more node back online to restore quorum and resource availability.
+- If only one node is online, the cluster will lose quorum and all resources will be stopped. Bring at least one more node back online to restore quorum and resource availability.
 - To check the floating IP on the active node:
   ```sh
   docker exec -it webz-001 ip addr show
