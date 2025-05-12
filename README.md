@@ -11,19 +11,30 @@ This project sets up a high-availability cluster and Jenkins CI environment usin
 
 ## Setup Instructions
 
-### 1. Build and Start the Environment
+### 1. Generate the Corosync Authkey (Required for Cluster Nodes)
+This key is used for secure communication between cluster nodes. Generate it once using Docker:
+```sh
+docker run --rm -v "$(pwd)/corosync-node":/corosync-node ubuntu:18.04 bash -c "\
+  apt-get update && \
+  apt-get install -y corosync && \
+  corosync-keygen && \
+  cp /etc/corosync/authkey /corosync-node/authkey"
+```
+This will create `corosync-node/authkey` in your project directory.
+
+### 2. Build and Start the Environment
 ```sh
 docker-compose up --build -d
 ```
 
-### 2. Persistent Jenkins Data
+### 3. Persistent Jenkins Data
 Jenkins data is stored in `./jenkins` on your host. If you have permission issues, run:
 ```sh
 sudo chown -R 1000:1000 ./jenkins
 sudo chmod -R 755 ./jenkins
 ```
 
-### 3. Access Jenkins
+### 4. Access Jenkins
 - URL: [http://localhost:8080](http://localhost:8080)
 - To get the initial admin password:
   1. SSH into the Jenkins container:
@@ -36,7 +47,7 @@ sudo chmod -R 755 ./jenkins
      sudo cat /var/jenkins_home/secrets/initialAdminPassword
      ```
 
-### 4. SSH Access to Containers
+### 5. SSH Access to Containers
 - webz-001: `ssh devops@localhost -p 2201`
 - webz-002: `ssh devops@localhost -p 2202`
 - webz-003: `ssh devops@localhost -p 2203`

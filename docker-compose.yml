@@ -10,6 +10,7 @@ services:
     privileged: true
     volumes:
       - ./logs/webz-001:/var/log/webz
+      - ./corosync-node/authkey:/etc/corosync/authkey:ro
     networks:
       webznet:
         ipv4_address: 172.28.1.11
@@ -24,6 +25,7 @@ services:
     privileged: true
     volumes:
       - ./logs/webz-002:/var/log/webz
+      - ./corosync-node/authkey:/etc/corosync/authkey:ro
     networks:
       webznet:
         ipv4_address: 172.28.1.12
@@ -39,6 +41,7 @@ services:
     privileged: true
     volumes:
       - ./logs/webz-003:/var/log/webz
+      - ./corosync-node/authkey:/etc/corosync/authkey:ro
     networks:
       webznet:
         ipv4_address: 172.28.1.13
@@ -68,3 +71,11 @@ networks:
     ipam:
       config:
         - subnet: 172.28.1.0/24 
+
+volumes:
+  corosync-authkey:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /Users/gabrielsonnino/Desktop/webz.io-assigment/corosync-node/authkey

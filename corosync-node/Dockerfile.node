@@ -9,6 +9,10 @@ RUN apt-get update && \
 RUN useradd -ms /bin/bash devops && echo "devops:devops" | chpasswd && adduser devops sudo
 
 RUN mkdir /var/run/sshd
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 22
 
-CMD ["/sbin/init"] 
+ENTRYPOINT ["/entrypoint.sh"]
