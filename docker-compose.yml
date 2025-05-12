@@ -1,0 +1,70 @@
+version: '3.8'
+services:
+  
+  webz-001:
+    build:
+      context: corosync-node
+      dockerfile: Dockerfile.node
+    container_name: webz-001
+    hostname: webz-001
+    privileged: true
+    volumes:
+      - ./logs/webz-001:/var/log/webz
+    networks:
+      webznet:
+        ipv4_address: 172.28.1.11
+    ports:
+      - "2201:22"
+  webz-002:
+    build:
+      context: corosync-node
+      dockerfile: Dockerfile.node
+    container_name: webz-002
+    hostname: webz-002
+    privileged: true
+    volumes:
+      - ./logs/webz-002:/var/log/webz
+    networks:
+      webznet:
+        ipv4_address: 172.28.1.12
+    ports:
+      - "2202:22"
+  
+  webz-003:
+    build:
+      context: corosync-node
+      dockerfile: Dockerfile.node
+    container_name: webz-003
+    hostname: webz-003
+    privileged: true
+    volumes:
+      - ./logs/webz-003:/var/log/webz
+    networks:
+      webznet:
+        ipv4_address: 172.28.1.13
+    ports:
+      - "2203:22"
+  
+  webz-004:
+    build:
+      context: ./jenkins-server
+      dockerfile: Dockerfile.jenkins
+    container_name: webz-004
+    hostname: webz-004
+    privileged: true
+    volumes:
+      - ./jenkins:/var/jenkins_home
+      - ./logs/webz-004:/var/log/webz
+    networks:
+      webznet:
+        ipv4_address: 172.28.1.14
+    ports:
+      - "2204:22"
+      - "8080:8080"
+
+networks:
+  webznet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.1.0/24 
