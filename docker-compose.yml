@@ -16,7 +16,7 @@ services:
         ipv4_address: 172.28.1.11
     ports:
       - "2201:22"
-      - "8081:80" # apache2 port forward to host
+      # - "8081:80" # apache2 port forward to host
   webz-002:
     build:
       context: corosync-node
