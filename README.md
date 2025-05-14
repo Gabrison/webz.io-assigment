@@ -88,7 +88,7 @@ A Jenkins pipeline job runs every 5 minutes to monitor the cluster. It checks wh
 ## Tests Performed
 
 ### Simulating Node Failure and Floating IP Failover
-To verify that the floating IP transfers to the next active server in the cluster, we performed the following test:
+To verify that the floating IP transfers to the next active server in the cluster, i performed the following test:
 - **Action:** Checked which server was currently holding the floating IP using the cluster status command:
   ```sh
   docker exec -it webz-001 crm status | cat
