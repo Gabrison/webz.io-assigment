@@ -5,7 +5,7 @@ pipeline {
         LOG_FILE = "/var/log/webz/active_node_ssh_log.txt"
     }
     stages {
-        stage('Get Active Node via SSH') {
+        stage('Get Active Node via SSH and cURL') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'cluster-ssh', usernameVariable: 'SSH_USER', passwordVariable: 'SSH_PASS')]) {
                     script {
@@ -14,10 +14,17 @@ pipeline {
                             script: 'sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$FLOATING_IP "hostname"',
                             returnStdout: true
                         ).trim()
-                        // Log the result with timestamp
-                        sh 'echo "$(date) - ' + hostname + '" >> $LOG_FILE'
-                        // Show the log in Jenkins output
-                        sh 'cat $LOG_FILE'
+                        
+                        def curl_output = sh(
+                            script: 'curl -s http://$FLOATING_IP',
+                            returnStdout: true
+                        ).trim()
+                        
+                        sh """
+                        echo "\$(date) - Host: ${hostname} - Response: ${curl_output}" >> $LOG_FILE
+                        """
+                        // Shows log in jenkins console
+                        sh "cat $LOG_FILE"
                     }
                 }
             }

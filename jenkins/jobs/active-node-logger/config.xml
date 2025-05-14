@@ -12,6 +12,9 @@
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
+      <abortPrevious>false</abortPrevious>
+    </org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty>
     <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
       <triggers>
         <hudson.triggers.TimerTrigger>
@@ -28,7 +31,7 @@
         LOG_FILE = &quot;/var/log/webz/active_node_ssh_log.txt&quot;
     }
     stages {
-        stage(&apos;Get Active Node via SSH&apos;) {
+        stage(&apos;Get Active Node via SSH and cURL&apos;) {
             steps {
                 withCredentials([usernamePassword(credentialsId: &apos;cluster-ssh&apos;, usernameVariable: &apos;SSH_USER&apos;, passwordVariable: &apos;SSH_PASS&apos;)]) {
                     script {
@@ -37,10 +40,17 @@
                             script: &apos;sshpass -p &quot;$SSH_PASS&quot; ssh -o StrictHostKeyChecking=no $SSH_USER@$FLOATING_IP &quot;hostname&quot;&apos;,
                             returnStdout: true
                         ).trim()
-                        // Log the result with timestamp
-                        sh &apos;echo &quot;$(date) - &apos; + hostname + &apos;&quot; &gt;&gt; $LOG_FILE&apos;
-                        // Show the log in Jenkins output
-                        sh &apos;cat $LOG_FILE&apos;
+                        
+                        def curl_output = sh(
+                            script: &apos;curl -s http://$FLOATING_IP&apos;,
+                            returnStdout: true
+                        ).trim()
+                        
+                        sh &quot;&quot;&quot;
+                        echo &quot;\$(date) - Host: ${hostname} - Response: ${curl_output}&quot; &gt;&gt; $LOG_FILE
+                        &quot;&quot;&quot;
+                        // Shows log in jenkins console
+                        sh &quot;cat $LOG_FILE&quot;
                     }
                 }
             }

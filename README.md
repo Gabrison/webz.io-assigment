@@ -1,11 +1,9 @@
-# webz.io-assigment
+# webz.io-assignment
 
 ## Overview
 This project sets up a high-availability cluster and Jenkins CI environment using Docker Compose. It includes:
 - 3 Ubuntu 18.04 containers as cluster nodes (webz-001, webz-002, webz-003) with Pacemaker, Corosync, and Apache2
 - 1 Jenkins container (webz-004) with SSH and persistent storage
-
-
 
 ## Setup Instructions
 
@@ -20,39 +18,34 @@ docker run --rm -v "$(pwd)/corosync-node":/corosync-node ubuntu:18.04 bash -c "\
 ```
 This will create `corosync-node/authkey` in your project directory.
 
+> **Note:** For ease of testing, the `authkey` file is already included in this repository.
+
 ### 2. Build and Start the Environment
 ```sh
 docker-compose up --build -d
 ```
 
-### 3. Persistent Jenkins Data
-Jenkins data is stored in `./jenkins` on your host. If you have permission issues, run:
-```sh
-sudo chown -R 1000:1000 ./jenkins
-sudo chmod -R 755 ./jenkins
-```
-
-### 4. Cluster Node Services & Automation
+### 3. Cluster Node Services & Automation
 All required services (sshd, corosync, pacemaker, apache2) are installed automatically in the cluster node image via the Dockerfile. The entrypoint script (`corosync-node/entrypoint.sh`) starts all services and ensures the Apache homepage displays the required message.
 
-### 5. Access Jenkins
-- URL: [http://localhost:8080](http://localhost:8080)
-- To get the initial admin password:
-  1. SSH into the Jenkins container:
-     ```sh
-     ssh devops@localhost -p 2204
-     # password: devops
-     ```
-  2. Run:
-     ```sh
-     sudo cat /var/jenkins_home/secrets/initialAdminPassword
-     ```
+### Floating IP Assignment
+- **Action:** The floating IP (`172.28.1.100`) was assigned to the cluster using Pacemaker and IPaddr2. This was configured automatically on container startup by the `corosync-node/entrypoint.sh` script.
+- **Configuration:**
+  - The entrypoint script on `webz-001` runs the following Pacemaker commands to create the floating IP resource and set location constraints:
+    ```sh
+    crm configure property stonith-enabled=false
+    crm configure primitive ClusterIP ocf:heartbeat:IPaddr2 \
+      params ip=172.28.1.100 cidr_netmask=24 \
+      op monitor interval=30s
+    crm configure rsc_defaults resource-stickiness=100
+    crm configure location prefer-webz-001 ClusterIP 100: webz-001
+    crm configure location prefer-webz-002 ClusterIP 50: webz-002
+    crm configure location prefer-webz-003 ClusterIP 0: webz-003
+    ```
+  - This ensures the floating IP always prefers `webz-001`, then `webz-002`, then `webz-003`.
 
-### 6. SSH Access to Containers
-- webz-001: `ssh devops@localhost -p 2201`
-- webz-002: `ssh devops@localhost -p 2202`
-- webz-003: `ssh devops@localhost -p 2203`
-- webz-004 (Jenkins): `ssh devops@localhost -p 2204`
+### 4. SSH Access to Containers
+- webz-num: `ssh devops@localhost -p (assigned port)`
 - Password for all: `devops`
 
 #### If you see a host key warning:
@@ -60,21 +53,7 @@ All required services (sshd, corosync, pacemaker, apache2) are installed automat
 ssh-keygen -R '[localhost]:2204'  # or the relevant port
 ```
 
-### 7. Checking Service Status in a Node
-To check if services are running inside a cluster node, exec into the container:
-```sh
-docker exec -it webz-001 bash
-```
-Then run:
-```sh
-service ssh status
-service corosync status
-service pacemaker status
-service apache2 status
-```
-
-
-### 8. Test Apache Homepage
+### 5. Test Apache Homepage
 If you expose port 80 in your Compose file, you can test from your host:
 ```sh
 curl http://localhost:PORT/
@@ -84,28 +63,66 @@ You should see:
 Junior DevOps Engineer - Home Task
 ```
 
-### 9. Cluster Resource Management, Failover Order, and Quorum
-- The cluster is configured with explicit resource location constraints so the floating IP always prefers webz-001, then webz-002, then webz-003.
-- To see which node is currently "active" (holding the floating IP), run:
-  ```sh
-  docker exec -it webz-001 crm status | cat
-  ```
-  or on any node. Look for the node listed after `Started` for the `ClusterIP` resource.
-- To simulate failover, stop corosync on the active node:
-  ```sh
-  docker exec -it webz-001 service corosync stop
-  ```
-  The floating IP will move to the next preferred node. Repeat for webz-002 to see it move to webz-003.
-- If only one node is online, the cluster will lose quorum and all resources will be stopped. Bring at least one more node back online to restore quorum and resource availability.
-- To check the floating IP on the active node:
-  ```sh
-  docker exec -it webz-001 ip addr show
-  ```
-  Look for `172.28.1.100` assigned to eth0.
+### 6. Access Jenkins
+- URL: [http://localhost:8080](http://localhost:8080)
+- **Username:** `admin`
+- **Password:** `Aa123456`
+
+### 7. Persistent Jenkins Data
+Jenkins data is stored in `./jenkins` on your host. If you have permission issues, run:
+```sh
+sudo chown -R 1000:1000 ./jenkins
+sudo chmod -R 755 ./jenkins
+```
+
+## Jenkins Pipeline Job
+
+A Jenkins pipeline job runs every 5 minutes to monitor the cluster. It checks which node is currently active (holding the floating IP) and logs the response from the Apache homepage. The results are appended to a log file (`./logs/webz-004/active_node_ssh_log.txt`).
 
 ## Log Volumes and Monitoring Logs
 - Jenkins container (`webz-004`) mounts the log volume:
   - Host: `./logs/webz-004`
   - Container: `/var/log/webz`
-- The cluster nodes (`webz-001`, `webz-002`, `webz-003`) do **not** mount any log volumes.
-- All monitoring logs (such as active node detection) are written by Jenkins and can be found in the above directory on the host.
+
+
+## Tests Performed
+
+### Simulating Node Failure and Floating IP Failover
+To verify that the floating IP transfers to the next active server in the cluster, we performed the following test:
+- **Action:** Checked which server was currently holding the floating IP using the cluster status command:
+  ```sh
+  docker exec -it webz-001 crm status | cat
+  ```
+- **Action:** Stopped the server running the floating IP by executing:
+  ```sh
+  docker stop webz-001
+  ```
+- **Result:** The floating IP automatically transferred to the next preferred server in the cluster (webz-002).
+- **Verification:** Confirmed the floating IP assignment by checking the cluster status on the next node using the commands:
+  ```sh
+  docker exec -it webz-002 crm status | cat
+  docker exec -it webz-002 ip addr show
+  ```
+
+> **Note:** If only one node is online, the cluster loses quorum and all resources (including the floating IP) are stopped. Bringing another node back online restores resource availability.
+
+### Automatic vs. Manual Failover
+- **Investigation:** Explored whether the floating IP transition required manual intervention or was automatic.
+- **Result:** The transition is fully automatic due to Pacemaker's configuration. No manual command is needed for failover.
+- **Configuration:** This automation is set up in the `corosync-node/entrypoint.sh` script, which configures Pacemaker with resource stickiness and location constraints to ensure the floating IP always prefers webz-001, then webz-002, then webz-003. (See the [Floating IP Assignment](#floating-ip-assignment) section for details.)
+
+### Manual Management of the Floating IP
+If needed, you can manually move the floating IP to a specific node with:
+```sh
+crm resource move ClusterIP webz-002
+```
+To return to automatic failover, clear the manual constraint with:
+```sh
+crm resource clear ClusterIP
+```
+
+### Jenkins Job Monitoring
+- **Action:** Verified that the Jenkins job runs every 5 minutes, sending a cURL request to the floating IP and logging the response, runtime, and active container name.
+- **Verification:** Checked the log file at `./logs/webz-004/jenkins-job.log` to ensure new records are appended for each run, and that the container name matches the current active node both before and after simulating failover and confirmed that new log entries in the Jenkins log file reflect the new active node.
+
+
