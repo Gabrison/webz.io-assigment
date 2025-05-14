@@ -136,7 +136,7 @@ crm resource clear ClusterIP
      - Use the `ocf:heartbeat:apache` agent's parameters to check if Apache is actually serving HTTP.
 
 3. **Centralized Logging:**
-   - Forward Jenkins and cluster logs to a centralized logging system (e.g., ELK Stack) for easier troubleshooting, auditing, and long-term analysis.
+   - Forward Jenkins and cluster logs to a centralized logging system (e.g., ELK Stack) for easier troubleshooting, auditing, and analysis.
 
 4. **Enable STONITH (Fencing):**
    - enable and configure STONITH to ensure that failed or partitioned nodes are safely powered off or isolated. This prevents split-brain scenarios and data corruption, making the cluster much more reliable.
