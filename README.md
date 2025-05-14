@@ -128,12 +128,12 @@ crm resource clear ClusterIP
 ## Suggestions for Improvement
 
 1. **Resource Grouping:**
-   - Group the floating IP and Apache resources in Pacemaker to ensure they always move together during failover, improving service reliability.
+   - Manage Apache as a Pacemaker resource and group it with the floating IP to ensure they always move together during failover, improving service reliability.
 
 2. **Monitoring and Alerts:**
    - Integrate monitoring tools and set up alerts for node/resource failures and failover events to enable monitoring using Prometheus and Grafana.
    - **Other tools:**
-     - Use the `ocf:heartbeat:apache` agent's parameters to check if Apache is actually serving HTTP.
+      Use the `ocf:heartbeat:apache` agent's parameters to check if Apache is actually serving HTTP.
 
 3. **Centralized Logging:**
    - Forward Jenkins and cluster logs to a centralized logging system (e.g., ELK Stack) for easier troubleshooting, auditing, and analysis.
