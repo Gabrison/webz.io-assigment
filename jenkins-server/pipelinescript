@@ -9,22 +9,21 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'cluster-ssh', usernameVariable: 'SSH_USER', passwordVariable: 'SSH_PASS')]) {
                     script {
-                        // SSH to the floating IP and get the hostname
-                        def hostname = sh(
-                            script: 'sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$FLOATING_IP "hostname"',
-                            returnStdout: true
-                        ).trim()
-                        
-                        def curl_output = sh(
-                            script: 'curl -s http://$FLOATING_IP',
-                            returnStdout: true
-                        ).trim()
-                        
-                        sh """
-                        echo "\$(date) - Host: ${hostname} - Response: ${curl_output}" >> $LOG_FILE
-                        """
-                        // Shows log in jenkins console
-                        sh "cat $LOG_FILE"
+                        try {
+                            def hostname = sh(
+                                script: 'sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$FLOATING_IP "hostname"',
+                                returnStdout: true
+                            ).trim()
+                            def curl_output = sh(
+                                script: 'curl -s http://$FLOATING_IP',
+                                returnStdout: true
+                            ).trim()
+                            sh 'echo "$(date) - Host: ' + hostname + ' - Response: ' + curl_output + '" >> ' + LOG_FILE
+                            sh 'cat ' + LOG_FILE
+                        } catch (err) {
+                            echo "ERROR: " + err.toString()
+                            error('Pipeline failed: ' + err.toString())
+                        }
                     }
                 }
             }

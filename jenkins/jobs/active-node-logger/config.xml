@@ -35,22 +35,21 @@
             steps {
                 withCredentials([usernamePassword(credentialsId: &apos;cluster-ssh&apos;, usernameVariable: &apos;SSH_USER&apos;, passwordVariable: &apos;SSH_PASS&apos;)]) {
                     script {
-                        // SSH to the floating IP and get the hostname
-                        def hostname = sh(
-                            script: &apos;sshpass -p &quot;$SSH_PASS&quot; ssh -o StrictHostKeyChecking=no $SSH_USER@$FLOATING_IP &quot;hostname&quot;&apos;,
-                            returnStdout: true
-                        ).trim()
-                        
-                        def curl_output = sh(
-                            script: &apos;curl -s http://$FLOATING_IP&apos;,
-                            returnStdout: true
-                        ).trim()
-                        
-                        sh &quot;&quot;&quot;
-                        echo &quot;\$(date) - Host: ${hostname} - Response: ${curl_output}&quot; &gt;&gt; $LOG_FILE
-                        &quot;&quot;&quot;
-                        // Shows log in jenkins console
-                        sh &quot;cat $LOG_FILE&quot;
+                        try {
+                            def hostname = sh(
+                                script: &apos;sshpass -p &quot;$SSH_PASS&quot; ssh -o StrictHostKeyChecking=no $SSH_USER@$FLOATING_IP &quot;hostname&quot;&apos;,
+                                returnStdout: true
+                            ).trim()
+                            def curl_output = sh(
+                                script: &apos;curl -s http://$FLOATING_IP&apos;,
+                                returnStdout: true
+                            ).trim()
+                            sh &apos;echo &quot;$(date) - Host: &apos; + hostname + &apos; - Response: &apos; + curl_output + &apos;&quot; &gt;&gt; &apos; + LOG_FILE
+                            sh &apos;cat &apos; + LOG_FILE
+                        } catch (err) {
+                            echo &quot;ERROR: &quot; + err.toString()
+                            error(&apos;Pipeline failed: &apos; + err.toString())
+                        }
                     }
                 }
             }

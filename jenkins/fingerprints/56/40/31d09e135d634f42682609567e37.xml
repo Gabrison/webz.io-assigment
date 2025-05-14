@@ -6,7 +6,7 @@
   <usages>
     <entry>
       <string>active-node-logger</string>
-      <ranges>1-414</ranges>
+      <ranges>1-415,421-429</ranges>
     </entry>
   </usages>
   <facets/>
