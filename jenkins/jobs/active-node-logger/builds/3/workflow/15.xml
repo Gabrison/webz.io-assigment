@@ -1,0 +1,28 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<Tag plugin="workflow-support@968.v8f17397e87b_8">
+  <node class="cps.n.StepAtomNode" plugin="workflow-cps@4106.v7a_8a_8176d450">
+    <parentIds>
+      <string>14</string>
+    </parentIds>
+    <id>15</id>
+    <descriptorId>org.jenkinsci.plugins.workflow.steps.durable_task.ShellStep</descriptorId>
+  </node>
+  <actions>
+    <cps.a.ArgumentsActionImpl plugin="workflow-cps@4106.v7a_8a_8176d450">
+      <arguments>
+        <entry>
+          <string>script</string>
+          <string>cat $LOG_FILE</string>
+        </entry>
+      </arguments>
+      <sensitiveVariables>
+        <string>SSH_PASS</string>
+      </sensitiveVariables>
+      <isUnmodifiedBySanitization>true</isUnmodifiedBySanitization>
+    </cps.a.ArgumentsActionImpl>
+    <wf.a.TimingAction plugin="workflow-api@1371.ve334280b_d611">
+      <startTime>1747121652285</startTime>
+    </wf.a.TimingAction>
+    <s.a.LogStorageAction/>
+  </actions>
+</Tag>

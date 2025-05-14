@@ -1,0 +1,13 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<fingerprint>
+  <timestamp>2025-05-12 14:15:14.385 UTC</timestamp>
+  <md5sum>564031d09e135d634f42682609567e37</md5sum>
+  <fileName>Credential id=cluster-ssh name=devops/****** (SSH to cluster nodes for monitoring)</fileName>
+  <usages>
+    <entry>
+      <string>active-node-logger</string>
+      <ranges>1-349</ranges>
+    </entry>
+  </usages>
+  <facets/>
+</fingerprint>
