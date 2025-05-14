@@ -125,4 +125,20 @@ crm resource clear ClusterIP
 - **Action:** Verified that the Jenkins job runs every 5 minutes, sending a cURL request to the floating IP and logging the response, runtime, and active container name.
 - **Verification:** Checked the log file at `./logs/webz-004/jenkins-job.log` to ensure new records are appended for each run, and that the container name matches the current active node both before and after simulating failover and confirmed that new log entries in the Jenkins log file reflect the new active node.
 
+## Suggestions for Improvement
+
+1. **Resource Grouping:**
+   - Group the floating IP and Apache resources in Pacemaker to ensure they always move together during failover, improving service reliability.
+
+2. **Monitoring and Alerts:**
+   - Integrate monitoring tools and set up alerts for node/resource failures and failover events to enable monitoring using Prometheus and Grafana.
+   - **Other tools:**
+     - Use the `ocf:heartbeat:apache` agent's parameters to check if Apache is actually serving HTTP.
+
+3. **Centralized Logging:**
+   - Forward Jenkins and cluster logs to a centralized logging system (e.g., ELK Stack) for easier troubleshooting, auditing, and long-term analysis.
+
+4. **Enable STONITH (Fencing):**
+   - enable and configure STONITH to ensure that failed or partitioned nodes are safely powered off or isolated. This prevents split-brain scenarios and data corruption, making the cluster much more reliable.
+
 
