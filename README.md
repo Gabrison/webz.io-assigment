@@ -37,8 +37,8 @@ All required services (sshd, corosync, pacemaker, apache2) are installed automat
     crm configure primitive ClusterIP ocf:heartbeat:IPaddr2 \
       params ip=172.28.1.100 cidr_netmask=24 \
       op monitor interval=30s
-    crm configure rsc_defaults resource-stickiness=100
-    crm configure location prefer-webz-001 ClusterIP 100: webz-001
+    crm configure rsc_defaults resource-stickiness=50
+    crm configure location prefer-webz-001 ClusterIP 200: webz-001
     crm configure location prefer-webz-002 ClusterIP 50: webz-002
     crm configure location prefer-webz-003 ClusterIP 0: webz-003
     ```
