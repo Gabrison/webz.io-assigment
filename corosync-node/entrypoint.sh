@@ -23,6 +23,8 @@ echo "Junior DevOps Engineer - Home Task" > "$HOMEPAGE"
 
 # Only configure the floating IP resource and constraints on 1 server: webz-001
 if [ "$(hostname)" = "webz-001" ]; then
+  echo "wiating for corosync nodes to be ready..."
+  sleep 20
   if ! crm status | grep -q ClusterIP; then
     echo "Disabling STONITH in Pacemaker..."
     crm configure property stonith-enabled=false
